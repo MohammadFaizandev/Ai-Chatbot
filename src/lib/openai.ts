@@ -45,24 +45,27 @@ export const MAX_OUTPUT_TOKENS = 2048;
 export async function* streamAssistantText(
   messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
   signal: AbortSignal,
+  preferredModel?: string,
 ): AsyncGenerator<string> {
   const env = serverEnv();
   const client = getOpenAIClient();
 
+  // The caller-chosen model (already allowlist-validated) leads; the
+  // configured chain follows as fallbacks for reliability.
+  const primary = preferredModel ?? env.OPENAI_MODEL;
   const params: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming & {
     models?: string[];
   } = {
-    model: env.OPENAI_MODEL,
+    model: primary,
     messages,
     stream: true,
     max_tokens: MAX_OUTPUT_TOKENS,
   };
-  if (env.OPENAI_FALLBACK_MODELS.length > 0) {
+  const chain = [primary, env.OPENAI_MODEL, ...env.OPENAI_FALLBACK_MODELS];
+  const uniqueChain = [...new Set(chain)];
+  if (uniqueChain.length > 1) {
     // OpenRouter rejects requests with more than 3 entries in `models`.
-    params.models = [env.OPENAI_MODEL, ...env.OPENAI_FALLBACK_MODELS].slice(
-      0,
-      3,
-    );
+    params.models = uniqueChain.slice(0, 3);
   }
 
   const MAX_ATTEMPTS = 3;

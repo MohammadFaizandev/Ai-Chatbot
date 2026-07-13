@@ -13,10 +13,12 @@ import { toast } from "sonner";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { ChatMessage } from "@/components/chat/chat-message";
+import { ModelPicker } from "@/components/chat/model-picker";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
+import { useSelectedModel } from "@/hooks/use-selected-model";
 import { APP_NAME } from "@/lib/brand";
 import { CLIENT_MAX_MESSAGE_LENGTH } from "@/lib/client-config";
 import type {
@@ -57,6 +59,7 @@ export function GuestChat({
   const [isGenerating, setIsGenerating] = useState(false);
   const [remaining, setRemaining] = useState(initialRemaining);
   const [text, setText] = useState("");
+  const [model, setModel] = useSelectedModel();
   const abortRef = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -128,6 +131,7 @@ export function GuestChat({
           messages: transcript
             .slice(-MAX_SENT_MESSAGES)
             .map(({ role, content }) => ({ role, content })),
+          model,
         }),
         signal: controller.signal,
       });
@@ -356,19 +360,23 @@ export function GuestChat({
             </Button>
           )}
         </div>
-        <p
-          className="text-muted-foreground mx-auto mt-1.5 w-full max-w-3xl px-1 text-xs"
-          aria-live="polite"
-        >
-          {limitReached
-            ? "Free guest messages used up — resets at midnight UTC."
-            : `${remaining} of ${limit} free guest messages left today · `}
-          {!limitReached && (
-            <Link href="/sign-up" className="underline underline-offset-2">
-              Sign up for {signedInLimit}/day
-            </Link>
-          )}
-        </p>
+        <div className="mx-auto mt-1 flex w-full max-w-3xl items-center justify-between gap-2 px-1">
+          <ModelPicker
+            value={model}
+            onChange={setModel}
+            disabled={isGenerating}
+          />
+          <p className="text-muted-foreground text-xs" aria-live="polite">
+            {limitReached
+              ? "Free guest messages used up — resets at midnight UTC."
+              : `${remaining} of ${limit} left · `}
+            {!limitReached && (
+              <Link href="/sign-up" className="underline underline-offset-2">
+                Sign up for {signedInLimit}/day
+              </Link>
+            )}
+          </p>
+        </div>
       </form>
     </div>
   );

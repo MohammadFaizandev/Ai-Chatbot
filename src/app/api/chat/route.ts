@@ -3,6 +3,7 @@ import type OpenAI from "openai";
 
 import { ERRORS, jsonError, logServerError, requireUserId } from "@/lib/api";
 import { serverEnv } from "@/lib/env";
+import { resolveChatModel } from "@/lib/models";
 import {
   streamAssistantText,
   SYSTEM_PROMPT,
@@ -60,6 +61,7 @@ export async function POST(request: NextRequest) {
   }
   const { conversationId, attachmentIds } = parsed.data;
   const text = parsed.data.message.trim();
+  const model = resolveChatModel(parsed.data.model);
 
   // 6-7. Text length is enforced by the schema; empty text needs an image.
   if (attachmentIds.length > env.MAX_IMAGES_PER_MESSAGE) {
@@ -184,6 +186,7 @@ export async function POST(request: NextRequest) {
           for await (const delta of streamAssistantText(
             providerMessages,
             request.signal,
+            model,
           )) {
             fullText += delta;
             send({ type: "delta", text: delta });

@@ -3,6 +3,7 @@ import type OpenAI from "openai";
 
 import { ERRORS, jsonError, logServerError } from "@/lib/api";
 import { serverEnv } from "@/lib/env";
+import { resolveChatModel } from "@/lib/models";
 import {
   currentUtcDate,
   decodeGuestUsage,
@@ -48,6 +49,7 @@ export async function POST(request: NextRequest) {
     return jsonError(400, parsed.error.issues[0]?.message ?? ERRORS.invalidInput);
   }
   const messages = parsed.data.messages;
+  const model = resolveChatModel(parsed.data.model);
   const last = messages[messages.length - 1];
   if (last.role !== "user" || last.content.trim().length === 0) {
     return jsonError(400, "Type a message to send.");
@@ -96,6 +98,7 @@ export async function POST(request: NextRequest) {
         for await (const delta of streamAssistantText(
           providerMessages,
           request.signal,
+          model,
         )) {
           send({ type: "delta", text: delta });
         }

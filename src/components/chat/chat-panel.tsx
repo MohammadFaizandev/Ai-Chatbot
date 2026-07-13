@@ -8,6 +8,7 @@ import { ChatMessage } from "@/components/chat/chat-message";
 import { useConversations } from "@/components/chat/conversations-provider";
 import { PENDING_PROMPT_STORAGE_KEY } from "@/components/chat/empty-chat";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
+import { useSelectedModel } from "@/hooks/use-selected-model";
 import { generateLocalTitle } from "@/lib/validation";
 import type {
   AttachmentMeta,
@@ -33,6 +34,7 @@ export function ChatPanel({
   const [streamingText, setStreamingText] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [usage, setUsage] = useState(initialUsage);
+  const [model, setModel] = useSelectedModel();
   // Prompt chosen on the empty-state screen, read once before first render.
   const [initialPrompt] = useState(() => {
     if (typeof window === "undefined") return "";
@@ -102,6 +104,7 @@ export function ChatPanel({
           conversationId: conversation.id,
           message: text,
           attachmentIds: attachments.map((attachment) => attachment.id),
+          model,
         }),
         signal: controller.signal,
       });
@@ -274,6 +277,8 @@ export function ChatPanel({
         isGenerating={isGenerating}
         onSend={send}
         onStop={stop}
+        model={model}
+        onModelChange={setModel}
         initialText={initialPrompt}
       />
     </div>

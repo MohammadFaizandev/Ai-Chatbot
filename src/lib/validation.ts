@@ -175,6 +175,8 @@ export function chatRequestSchema(maxMessageLength: number) {
         `Messages must be at most ${maxMessageLength} characters.`,
       ),
     attachmentIds: z.array(z.uuid()).max(10).default([]),
+    // Validated against the allowlist server-side (resolveChatModel).
+    model: z.string().max(100).optional(),
   });
 }
 
@@ -202,6 +204,8 @@ export function guestChatRequestSchema(
       )
       .min(1, "Send at least one message.")
       .max(maxContextMessages),
+    // Validated against the allowlist server-side (resolveChatModel).
+    model: z.string().max(100).optional(),
   });
 }
 

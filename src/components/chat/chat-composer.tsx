@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 
 import { ImagePreview, type PendingImage } from "@/components/chat/image-preview";
+import { ModelPicker } from "@/components/chat/model-picker";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -37,6 +38,8 @@ export function ChatComposer({
   isGenerating,
   onSend,
   onStop,
+  model,
+  onModelChange,
   initialText = "",
 }: {
   conversationId: string;
@@ -44,6 +47,8 @@ export function ChatComposer({
   isGenerating: boolean;
   onSend: (text: string, attachments: AttachmentMeta[]) => void;
   onStop: () => void;
+  model: string;
+  onModelChange: (id: string) => void;
   initialText?: string;
 }) {
   const { userId } = useAuth();
@@ -274,13 +279,20 @@ export function ChatComposer({
         )}
       </div>
 
-      <div className="text-muted-foreground mt-1.5 flex items-center justify-between px-1 text-xs">
-        <span aria-live="polite">{remainingLabel}</span>
-        {text.length > CLIENT_MAX_MESSAGE_LENGTH * 0.9 && (
-          <span>
-            {text.length}/{CLIENT_MAX_MESSAGE_LENGTH}
-          </span>
-        )}
+      <div className="mt-1 flex items-center justify-between gap-2 px-1">
+        <ModelPicker
+          value={model}
+          onChange={onModelChange}
+          disabled={isGenerating}
+        />
+        <div className="text-muted-foreground flex items-center gap-2 text-xs">
+          <span aria-live="polite">{remainingLabel}</span>
+          {text.length > CLIENT_MAX_MESSAGE_LENGTH * 0.9 && (
+            <span>
+              {text.length}/{CLIENT_MAX_MESSAGE_LENGTH}
+            </span>
+          )}
+        </div>
       </div>
     </form>
   );
