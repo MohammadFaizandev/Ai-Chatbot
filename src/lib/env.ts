@@ -24,8 +24,23 @@ const serverEnvSchema = z.object({
     .union([z.url(), z.literal("")])
     .optional()
     .transform((v) => (v ? v : undefined)),
+  /**
+   * Optional comma-separated fallback model ids (OpenRouter routes to the
+   * next one when the primary is rate-limited or unavailable).
+   */
+  OPENAI_FALLBACK_MODELS: z
+    .string()
+    .optional()
+    .transform((value) =>
+      value
+        ? value
+            .split(",")
+            .map((model) => model.trim())
+            .filter(Boolean)
+        : [],
+    ),
   NEXT_PUBLIC_APP_URL: z.url().default("http://localhost:3000"),
-  DAILY_MESSAGE_LIMIT: z.coerce.number().int().positive().default(10),
+  DAILY_MESSAGE_LIMIT: z.coerce.number().int().positive().default(50),
   MAX_MESSAGE_LENGTH: z.coerce.number().int().positive().default(8000),
   MAX_IMAGE_SIZE_MB: z.coerce.number().positive().default(5),
   MAX_IMAGES_PER_MESSAGE: z.coerce.number().int().positive().default(1),

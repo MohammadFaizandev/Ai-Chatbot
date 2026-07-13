@@ -64,7 +64,7 @@ _Placeholders — add your own after running the app._
   - [OpenAI](https://platform.openai.com) (usage-based billing)
 - For deployment: [GitHub](https://github.com) and [Vercel](https://vercel.com)
 
-**Cost note:** Next.js is free and open source. GitHub, Supabase, Clerk, and Vercel all offer free tiers suitable for this project. **AI API usage is not completely free** with OpenAI — it is billed per token. Set a small budget and usage alerts, or use OpenRouter's `:free` models for testing. The built-in daily message limit (`DAILY_MESSAGE_LIMIT`, default 10/user/day) is your main cost protection.
+**Cost note:** Next.js is free and open source. GitHub, Supabase, Clerk, and Vercel all offer free tiers suitable for this project. **AI API usage is not completely free** with OpenAI — it is billed per token. Set a small budget and usage alerts, or use OpenRouter's `:free` models for testing. The built-in daily message limit (`DAILY_MESSAGE_LIMIT`, default 50/user/day) is your main cost protection.
 
 ## Local installation
 
@@ -88,9 +88,9 @@ See `.env.example` for the full annotated list. Summary:
 | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` etc. | Auth page routes and post-auth redirects |
 | `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase project URL + publishable key |
 | `OPENAI_API_KEY` | AI provider key (**server-only, never exposed**) |
-| `OPENAI_MODEL` | Model id, e.g. `meta-llama/llama-4-maverick:free` (OpenRouter) or `gpt-4o-mini` (OpenAI) |
+| `OPENAI_MODEL` | Model id, e.g. `google/gemma-4-31b-it:free` (OpenRouter) or `gpt-4o-mini` (OpenAI) |
 | `OPENAI_BASE_URL` | `https://openrouter.ai/api/v1` for OpenRouter; empty for OpenAI |
-| `DAILY_MESSAGE_LIMIT` | Messages per user per UTC day (default 10) |
+| `DAILY_MESSAGE_LIMIT` | Messages per user per UTC day (default 50) |
 | `MAX_MESSAGE_LENGTH`, `MAX_CONTEXT_MESSAGES`, `MAX_IMAGE_SIZE_MB`, `MAX_IMAGES_PER_MESSAGE` | Guardrails |
 
 ### Database migration

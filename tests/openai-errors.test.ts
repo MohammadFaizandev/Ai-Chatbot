@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { describe, expect, it } from "vitest";
 
-import { toSafeAIError } from "@/lib/openai";
+import { isRetryableAIError, toSafeAIError } from "@/lib/openai";
 
 type APIErrorInstance = InstanceType<typeof OpenAI.APIError>;
 
@@ -44,6 +44,20 @@ describe("toSafeAIError", () => {
     const safe = toSafeAIError(new TypeError("fetch failed"));
     expect(safe.status).toBe(502);
     expect(safe.userMessage).toMatch(/connection/i);
+  });
+
+  it("retries rate limits, overload, and network failures only", () => {
+    expect(isRetryableAIError(apiError(429))).toBe(true);
+    expect(isRetryableAIError(apiError(500))).toBe(true);
+    expect(isRetryableAIError(apiError(503))).toBe(true);
+    expect(isRetryableAIError(new TypeError("fetch failed"))).toBe(true);
+
+    expect(isRetryableAIError(apiError(400))).toBe(false);
+    expect(isRetryableAIError(apiError(401))).toBe(false);
+    expect(isRetryableAIError(apiError(404))).toBe(false);
+    const abort = new Error("aborted");
+    abort.name = "AbortError";
+    expect(isRetryableAIError(abort)).toBe(false);
   });
 
   it("never includes secrets or stack traces in user messages", () => {

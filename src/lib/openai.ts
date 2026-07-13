@@ -43,6 +43,20 @@ export type SafeAIError = {
   logLabel: string;
 };
 
+/**
+ * Whether a failed AI request is worth retrying: rate limits, provider
+ * overload (5xx), or network failures. Never retry aborts or bad requests.
+ */
+export function isRetryableAIError(error: unknown): boolean {
+  if (error instanceof Error && error.name === "AbortError") return false;
+  if (error instanceof OpenAI.APIError) {
+    const status = error.status;
+    return status === 429 || status === undefined || status >= 500;
+  }
+  // Non-API errors here are typically network-level failures.
+  return error instanceof TypeError || error instanceof Error;
+}
+
 /** Map provider/network errors to user-safe messages. */
 export function toSafeAIError(error: unknown): SafeAIError {
   if (error instanceof OpenAI.APIError) {

@@ -5,6 +5,7 @@ import { ERRORS, jsonError, logServerError, requireUserId } from "@/lib/api";
 import { serverEnv } from "@/lib/env";
 import {
   getOpenAIClient,
+  isRetryableAIError,
   MAX_OUTPUT_TOKENS,
   SYSTEM_PROMPT,
   toSafeAIError,
@@ -180,23 +181,56 @@ export async function POST(request: NextRequest) {
             message: userMessage,
           });
 
-          // 15-16. Stream the model response to the client.
+          // 15-16. Stream the model response to the client. Transient
+          // provider failures (rate limits, overload) are retried with
+          // backoff as long as no content has been emitted yet. With
+          // OpenRouter, OPENAI_FALLBACK_MODELS additionally lets the
+          // provider route to an alternative model automatically.
           const client = getOpenAIClient();
-          const completion = await client.chat.completions.create(
-            {
-              model: env.OPENAI_MODEL,
-              messages: providerMessages,
-              stream: true,
-              max_tokens: MAX_OUTPUT_TOKENS,
-            },
-            { signal: request.signal },
-          );
+          const completionParams: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming & {
+            models?: string[];
+          } = {
+            model: env.OPENAI_MODEL,
+            messages: providerMessages,
+            stream: true,
+            max_tokens: MAX_OUTPUT_TOKENS,
+          };
+          if (env.OPENAI_FALLBACK_MODELS.length > 0) {
+            completionParams.models = [
+              env.OPENAI_MODEL,
+              ...env.OPENAI_FALLBACK_MODELS,
+            ];
+          }
 
-          for await (const chunk of completion) {
-            const delta = chunk.choices[0]?.delta?.content ?? "";
-            if (delta) {
-              fullText += delta;
-              send({ type: "delta", text: delta });
+          const MAX_ATTEMPTS = 3;
+          for (let attempt = 1; ; attempt++) {
+            try {
+              const completion = await client.chat.completions.create(
+                completionParams,
+                { signal: request.signal },
+              );
+              for await (const chunk of completion) {
+                const delta = chunk.choices[0]?.delta?.content ?? "";
+                if (delta) {
+                  fullText += delta;
+                  send({ type: "delta", text: delta });
+                }
+              }
+              break;
+            } catch (streamError) {
+              const canRetry =
+                attempt < MAX_ATTEMPTS &&
+                fullText.length === 0 &&
+                !request.signal.aborted &&
+                isRetryableAIError(streamError);
+              if (!canRetry) throw streamError;
+              logServerError(
+                `chat_stream_retry_${attempt}`,
+                streamError,
+              );
+              await new Promise((resolve) =>
+                setTimeout(resolve, attempt * 800),
+              );
             }
           }
 
