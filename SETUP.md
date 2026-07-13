@@ -7,7 +7,7 @@ Every step you must do by hand, in order. Budget ~20 minutes. When you finish, `
 ## 1. Clerk (authentication)
 
 1. Go to <https://dashboard.clerk.com> and create a free account.
-2. **Create application** → name it (e.g. "NovaChat") → enable **Email** sign-in. Optionally also enable **Google**.
+2. **Create application** → name it (e.g. "Pulse AI") → enable **Email** sign-in. Optionally also enable **Google**.
 3. On the **API Keys** page copy:
    - **Publishable key** → `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` in `.env.local`
    - **Secret key** → `CLERK_SECRET_KEY` in `.env.local`

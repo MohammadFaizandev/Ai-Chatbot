@@ -1,4 +1,4 @@
-# NovaChat — AI SaaS Chat Application
+# Pulse AI — AI SaaS Chat Application
 
 A secure, production-ready AI chat application. Authenticated users hold streamed AI conversations with saved history, image analysis, rich Markdown answers, and a daily usage limit — built on a modern, free-tier-friendly stack.
 

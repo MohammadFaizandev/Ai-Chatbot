@@ -6,7 +6,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { useConversations } from "@/components/chat/conversations-provider";
 import { Button } from "@/components/ui/button";
 
-export const PENDING_PROMPT_STORAGE_KEY = "nova:pending-prompt";
+export const PENDING_PROMPT_STORAGE_KEY = "pulse:pending-prompt";
 
 const EXAMPLE_PROMPTS = [
   "Explain how JWT authentication works, with a diagram in a table.",
