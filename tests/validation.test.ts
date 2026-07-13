@@ -9,6 +9,8 @@ import {
   extensionForMimeType,
   fileExtensionMatchesMime,
   generateLocalTitle,
+  imageGenerationSchema,
+  IMAGE_PROMPT_MAX_LENGTH,
   isAllowedImageMimeType,
   isSendableMessage,
   isValidStoragePath,
@@ -234,6 +236,31 @@ describe("chat request schema", () => {
       schema.safeParse({
         conversationId: CONVERSATION_ID,
         message: "x".repeat(101),
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("imageGenerationSchema", () => {
+  it("accepts and trims a valid prompt", () => {
+    const result = imageGenerationSchema.safeParse({
+      prompt: "  a red robot  ",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.prompt).toBe("a red robot");
+  });
+
+  it("rejects empty or whitespace-only prompts", () => {
+    expect(imageGenerationSchema.safeParse({ prompt: "" }).success).toBe(false);
+    expect(imageGenerationSchema.safeParse({ prompt: "   " }).success).toBe(
+      false,
+    );
+  });
+
+  it("rejects prompts over the max length", () => {
+    expect(
+      imageGenerationSchema.safeParse({
+        prompt: "x".repeat(IMAGE_PROMPT_MAX_LENGTH + 1),
       }).success,
     ).toBe(false);
   });

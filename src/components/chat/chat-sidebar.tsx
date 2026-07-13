@@ -1,8 +1,9 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { Search, SquarePen } from "lucide-react";
+import { ImageIcon, Search, SquarePen } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { BrandLogo } from "@/components/brand-logo";
@@ -12,6 +13,7 @@ import { SearchDialog } from "@/components/chat/search-dialog";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { APP_NAME } from "@/lib/brand";
+import { cn } from "@/lib/utils";
 
 const navItemClass =
   "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-sidebar-ring/50 flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm font-medium outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50";
@@ -19,6 +21,7 @@ const navItemClass =
 export function ChatSidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { createConversation, isCreating } = useConversations();
   const [searchOpen, setSearchOpen] = useState(false);
+  const pathname = usePathname();
 
   const handleNewChat = async () => {
     const conversation = await createConversation();
@@ -70,6 +73,19 @@ export function ChatSidebar({ onNavigate }: { onNavigate?: () => void }) {
             Ctrl K
           </kbd>
         </button>
+        <Link
+          href="/images"
+          onClick={onNavigate}
+          aria-current={pathname === "/images" ? "page" : undefined}
+          className={cn(
+            navItemClass,
+            pathname === "/images" &&
+              "bg-sidebar-accent text-sidebar-accent-foreground",
+          )}
+        >
+          <ImageIcon className="size-4 shrink-0" aria-hidden="true" />
+          Create image
+        </Link>
       </nav>
 
       <div className="text-muted-foreground px-4 pt-3 pb-1 text-xs font-medium">

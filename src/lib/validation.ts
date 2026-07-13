@@ -205,6 +205,24 @@ export function guestChatRequestSchema(
   });
 }
 
+export const IMAGE_PROMPT_MAX_LENGTH = 500;
+
+/** Text-to-image generation request (Pollinations, server-proxied). */
+export const imageGenerationSchema = z.object({
+  prompt: z
+    .string()
+    .transform((value) => value.trim())
+    .pipe(
+      z
+        .string()
+        .min(1, "Describe the image you want to generate.")
+        .max(
+          IMAGE_PROMPT_MAX_LENGTH,
+          `Prompt must be at most ${IMAGE_PROMPT_MAX_LENGTH} characters.`,
+        ),
+    ),
+});
+
 export const attachmentRegisterSchema = z.object({
   conversationId: z.uuid("Invalid conversation id."),
   storagePath: z.string().min(1).max(300),

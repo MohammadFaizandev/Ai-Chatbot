@@ -25,6 +25,7 @@ A secure, production-ready AI chat application. Authenticated users hold streame
 - **Saved chat history** — reopen, rename, and delete conversations (with confirmation)
 - **Automatic titles** — generated locally from your first message, no extra AI call
 - **Image analysis** — attach a JPEG/PNG/WebP image and ask questions about it
+- **Image generation** — a "Create image" studio that turns a text prompt into a downloadable image (free, via Pollinations)
 - **Markdown rendering** — GFM tables, lists, blockquotes, links, and code blocks with a copy button
 - **Daily message limit** — enforced atomically in Postgres, remaining allowance shown in the UI
 - **Light / dark / system theme** — via next-themes, no hydration flash
