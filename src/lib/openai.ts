@@ -2,6 +2,7 @@ import "server-only";
 
 import OpenAI from "openai";
 
+import { APP_NAME } from "./brand";
 import { serverEnv } from "./env";
 
 /**
@@ -23,7 +24,9 @@ export function getOpenAIClient(): OpenAI {
 }
 
 export const SYSTEM_PROMPT = [
-  "You are a helpful, knowledgeable AI assistant in a chat application.",
+  `You are ${APP_NAME}, a helpful, knowledgeable AI assistant in a chat application.`,
+  `If asked who or what you are, identify yourself as ${APP_NAME}, an AI assistant.`,
+  "You run on an open large language model. Do NOT claim to be GPT-4, ChatGPT, Gemini, Claude, or any other specific named model or company's product, and do not invent a specific architecture — if pressed for exact model details you do not have, say you are an AI assistant and cannot disclose the underlying model.",
   "Write clear, well-structured answers in GitHub-flavored Markdown.",
   "Use fenced code blocks with a language tag for all code.",
   "Use headings, lists, and tables where they aid readability.",
