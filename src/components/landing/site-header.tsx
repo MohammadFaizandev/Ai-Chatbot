@@ -1,7 +1,7 @@
 import { Show, UserButton } from "@clerk/nextjs";
-import { MessageSquareText } from "lucide-react";
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/brand";
@@ -17,9 +17,7 @@ export function SiteHeader() {
           href="/"
           className="flex items-center gap-2 font-semibold tracking-tight"
         >
-          <span className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-md">
-            <MessageSquareText className="size-4" aria-hidden="true" />
-          </span>
+          <BrandLogo className="size-7" />
           {APP_NAME}
         </Link>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquareText, SendHorizontal, Square } from "lucide-react";
+import { SendHorizontal, Square } from "lucide-react";
 import Link from "next/link";
 import {
   useEffect,
@@ -11,6 +11,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -242,7 +243,7 @@ export function GuestChat({
     <div className="flex h-dvh flex-col">
       <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <MessageSquareText className="size-5" aria-hidden="true" />
+          <BrandLogo className="size-7" />
           {APP_NAME}
           <span className="text-muted-foreground text-xs font-normal">
             · Guest mode

@@ -2,6 +2,7 @@ import { Show } from "@clerk/nextjs";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { APP_NAME } from "@/lib/brand";
@@ -9,6 +10,7 @@ import { APP_NAME } from "@/lib/brand";
 export function Hero() {
   return (
     <section className="mx-auto w-full max-w-6xl px-4 pt-20 pb-16 text-center sm:pt-28">
+      <BrandLogo className="mx-auto mb-6 size-16 rounded-2xl" />
       <Badge variant="secondary" className="mb-4">
         <Sparkles className="size-3" aria-hidden="true" />
         AI chat, done right
