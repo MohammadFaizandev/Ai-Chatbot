@@ -178,6 +178,33 @@ export function chatRequestSchema(maxMessageLength: number) {
   });
 }
 
+/**
+ * Guest (no-account) chat payload: the browser holds the history, so the
+ * request carries the recent transcript. The last entry must be the new
+ * user message; the server re-caps count and length.
+ */
+export function guestChatRequestSchema(
+  maxMessageLength: number,
+  maxContextMessages: number,
+) {
+  return z.object({
+    messages: z
+      .array(
+        z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z
+            .string()
+            .max(
+              maxMessageLength,
+              `Messages must be at most ${maxMessageLength} characters.`,
+            ),
+        }),
+      )
+      .min(1, "Send at least one message.")
+      .max(maxContextMessages),
+  });
+}
+
 export const attachmentRegisterSchema = z.object({
   conversationId: z.uuid("Invalid conversation id."),
   storagePath: z.string().min(1).max(300),

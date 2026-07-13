@@ -34,6 +34,66 @@ export const SYSTEM_PROMPT = [
 /** Hard cap on generated output tokens to protect cost and latency. */
 export const MAX_OUTPUT_TOKENS = 2048;
 
+/**
+ * Stream assistant text for the given messages, yielding content deltas.
+ *
+ * Transient provider failures (rate limits, overload, network) are retried
+ * up to three times with backoff as long as nothing has been emitted yet.
+ * With OpenRouter, OPENAI_FALLBACK_MODELS additionally lets the provider
+ * route to an alternative model automatically.
+ */
+export async function* streamAssistantText(
+  messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+  signal: AbortSignal,
+): AsyncGenerator<string> {
+  const env = serverEnv();
+  const client = getOpenAIClient();
+
+  const params: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming & {
+    models?: string[];
+  } = {
+    model: env.OPENAI_MODEL,
+    messages,
+    stream: true,
+    max_tokens: MAX_OUTPUT_TOKENS,
+  };
+  if (env.OPENAI_FALLBACK_MODELS.length > 0) {
+    // OpenRouter rejects requests with more than 3 entries in `models`.
+    params.models = [env.OPENAI_MODEL, ...env.OPENAI_FALLBACK_MODELS].slice(
+      0,
+      3,
+    );
+  }
+
+  const MAX_ATTEMPTS = 3;
+  let emitted = false;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const completion = await client.chat.completions.create(params, {
+        signal,
+      });
+      for await (const chunk of completion) {
+        const delta = chunk.choices[0]?.delta?.content ?? "";
+        if (delta) {
+          emitted = true;
+          yield delta;
+        }
+      }
+      return;
+    } catch (error) {
+      const canRetry =
+        attempt < MAX_ATTEMPTS &&
+        !emitted &&
+        !signal.aborted &&
+        isRetryableAIError(error);
+      if (!canRetry) throw error;
+      const detail = error instanceof Error ? error.message : String(error);
+      console.error(`[api] ai_stream_retry_${attempt}: ${detail}`);
+      await new Promise((resolve) => setTimeout(resolve, attempt * 800));
+    }
+  }
+}
+
 export type SafeAIError = {
   /** HTTP status to return to the browser. */
   status: number;

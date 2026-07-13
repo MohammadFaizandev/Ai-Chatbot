@@ -41,6 +41,7 @@ const serverEnvSchema = z.object({
     ),
   NEXT_PUBLIC_APP_URL: z.url().default("http://localhost:3000"),
   DAILY_MESSAGE_LIMIT: z.coerce.number().int().positive().default(50),
+  GUEST_DAILY_MESSAGE_LIMIT: z.coerce.number().int().positive().default(20),
   MAX_MESSAGE_LENGTH: z.coerce.number().int().positive().default(8000),
   MAX_IMAGE_SIZE_MB: z.coerce.number().positive().default(5),
   MAX_IMAGES_PER_MESSAGE: z.coerce.number().int().positive().default(1),

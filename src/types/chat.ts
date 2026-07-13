@@ -23,3 +23,17 @@ export type UsageInfo = {
   limit: number;
   remaining: number;
 };
+
+/** Events emitted by the guest (no-account) streaming chat API. */
+export type GuestChatStreamEvent =
+  | { type: "delta"; text: string }
+  | { type: "done"; remaining: number }
+  | { type: "error"; message: string; remaining: number };
+
+/** A guest chat message held only in the browser (never persisted). */
+export type GuestChatMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  status: "completed" | "error";
+};

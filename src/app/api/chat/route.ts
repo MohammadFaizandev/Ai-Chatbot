@@ -4,9 +4,7 @@ import type OpenAI from "openai";
 import { ERRORS, jsonError, logServerError, requireUserId } from "@/lib/api";
 import { serverEnv } from "@/lib/env";
 import {
-  getOpenAIClient,
-  isRetryableAIError,
-  MAX_OUTPUT_TOKENS,
+  streamAssistantText,
   SYSTEM_PROMPT,
   toSafeAIError,
 } from "@/lib/openai";
@@ -181,57 +179,14 @@ export async function POST(request: NextRequest) {
             message: userMessage,
           });
 
-          // 15-16. Stream the model response to the client. Transient
-          // provider failures (rate limits, overload) are retried with
-          // backoff as long as no content has been emitted yet. With
-          // OpenRouter, OPENAI_FALLBACK_MODELS additionally lets the
-          // provider route to an alternative model automatically.
-          const client = getOpenAIClient();
-          const completionParams: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming & {
-            models?: string[];
-          } = {
-            model: env.OPENAI_MODEL,
-            messages: providerMessages,
-            stream: true,
-            max_tokens: MAX_OUTPUT_TOKENS,
-          };
-          if (env.OPENAI_FALLBACK_MODELS.length > 0) {
-            completionParams.models = [
-              env.OPENAI_MODEL,
-              ...env.OPENAI_FALLBACK_MODELS,
-            ];
-          }
-
-          const MAX_ATTEMPTS = 3;
-          for (let attempt = 1; ; attempt++) {
-            try {
-              const completion = await client.chat.completions.create(
-                completionParams,
-                { signal: request.signal },
-              );
-              for await (const chunk of completion) {
-                const delta = chunk.choices[0]?.delta?.content ?? "";
-                if (delta) {
-                  fullText += delta;
-                  send({ type: "delta", text: delta });
-                }
-              }
-              break;
-            } catch (streamError) {
-              const canRetry =
-                attempt < MAX_ATTEMPTS &&
-                fullText.length === 0 &&
-                !request.signal.aborted &&
-                isRetryableAIError(streamError);
-              if (!canRetry) throw streamError;
-              logServerError(
-                `chat_stream_retry_${attempt}`,
-                streamError,
-              );
-              await new Promise((resolve) =>
-                setTimeout(resolve, attempt * 800),
-              );
-            }
+          // 15-16. Stream the model response to the client (with retry
+          // and fallback-model handling inside streamAssistantText).
+          for await (const delta of streamAssistantText(
+            providerMessages,
+            request.signal,
+          )) {
+            fullText += delta;
+            send({ type: "delta", text: delta });
           }
 
           // 17-18, 20-22. Persist, record usage, bump conversation.

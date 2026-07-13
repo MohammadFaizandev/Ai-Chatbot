@@ -23,11 +23,14 @@ export function Hero() {
       </p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Show when="signed-out">
-          <Button size="lg" render={<Link href="/sign-up" />}>
-            Start chatting free
+          <Button size="lg" render={<Link href="/try" />}>
+            Try it free — no account
             <ArrowRight className="size-4" aria-hidden="true" />
           </Button>
-          <Button size="lg" variant="outline" render={<Link href="/sign-in" />}>
+          <Button size="lg" variant="outline" render={<Link href="/sign-up" />}>
+            Sign up for more
+          </Button>
+          <Button size="lg" variant="ghost" render={<Link href="/sign-in" />}>
             Sign in
           </Button>
         </Show>

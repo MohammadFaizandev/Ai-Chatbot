@@ -6,6 +6,7 @@ A secure, production-ready AI chat application. Authenticated users hold streame
 
 ## Features
 
+- **Guest trial mode** — visitors chat on `/try` without an account (20 messages/day via a signed cookie, browser-only history); signing up unlocks the full allowance, saved history, and images
 - **Streamed AI responses** — answers render word by word, with a stop button (AbortController)
 - **Saved chat history** — reopen, rename, and delete conversations (with confirmation)
 - **Automatic titles** — generated locally from your first message, no extra AI call
@@ -90,7 +91,8 @@ See `.env.example` for the full annotated list. Summary:
 | `OPENAI_API_KEY` | AI provider key (**server-only, never exposed**) |
 | `OPENAI_MODEL` | Model id, e.g. `google/gemma-4-31b-it:free` (OpenRouter) or `gpt-4o-mini` (OpenAI) |
 | `OPENAI_BASE_URL` | `https://openrouter.ai/api/v1` for OpenRouter; empty for OpenAI |
-| `DAILY_MESSAGE_LIMIT` | Messages per user per UTC day (default 50) |
+| `DAILY_MESSAGE_LIMIT` | Messages per signed-in user per UTC day (default 50) |
+| `GUEST_DAILY_MESSAGE_LIMIT` | Messages per guest visitor per UTC day on `/try` (default 20) |
 | `MAX_MESSAGE_LENGTH`, `MAX_CONTEXT_MESSAGES`, `MAX_IMAGE_SIZE_MB`, `MAX_IMAGES_PER_MESSAGE` | Guardrails |
 
 ### Database migration
