@@ -4,6 +4,7 @@ import { useSession } from "@clerk/nextjs";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { useMemo } from "react";
 
+import { fetchWithClockSkewRetry } from "@/lib/supabase/clock-skew-fetch";
 import type { Database } from "@/types/database";
 
 export type TypedSupabaseBrowserClient = SupabaseClient<Database>;
@@ -30,6 +31,7 @@ export function useSupabaseBrowserClient(): TypedSupabaseBrowserClient | null {
         autoRefreshToken: false,
         detectSessionInUrl: false,
       },
+      global: { fetch: fetchWithClockSkewRetry },
     });
   }, [session]);
 }

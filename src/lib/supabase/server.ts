@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import { serverEnv } from "@/lib/env";
+import { fetchWithClockSkewRetry } from "@/lib/supabase/clock-skew-fetch";
 import type { Database } from "@/types/database";
 
 export type TypedSupabaseClient = SupabaseClient<Database>;
@@ -31,6 +32,7 @@ export function createServerSupabaseClient(): TypedSupabaseClient {
         autoRefreshToken: false,
         detectSessionInUrl: false,
       },
+      global: { fetch: fetchWithClockSkewRetry },
     },
   );
 }
