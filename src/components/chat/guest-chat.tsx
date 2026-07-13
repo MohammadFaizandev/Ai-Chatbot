@@ -269,15 +269,13 @@ export function GuestChat({
       >
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-6">
           {messages.length === 0 && streamingText === null && (
-            <div className="py-16 text-center">
-              <h1 className="text-lg font-semibold">
-                Try {APP_NAME} — no account needed
+            <div className="flex flex-col items-center justify-center py-28 text-center">
+              <BrandLogo className="size-20 rounded-3xl" />
+              <h1 className="mt-6 text-2xl font-semibold tracking-tight">
+                How can I help you today?
               </h1>
-              <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
-                You have {limit} free messages per day as a guest. Your
-                conversation stays in this browser tab only. Sign up free for{" "}
-                {signedInLimit} daily messages, saved history, and image
-                analysis.
+              <p className="text-muted-foreground mt-2 max-w-md text-sm">
+                {limit} free messages per day, no account needed.
               </p>
             </div>
           )}

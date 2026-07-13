@@ -1,10 +1,10 @@
 "use client";
 
-import { Lightbulb, MessageSquareText } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { useConversations } from "@/components/chat/conversations-provider";
 import { Button } from "@/components/ui/button";
-import { APP_NAME } from "@/lib/brand";
 
 export const PENDING_PROMPT_STORAGE_KEY = "nova:pending-prompt";
 
@@ -31,12 +31,10 @@ export function EmptyChat() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 overflow-y-auto px-4 py-10 text-center">
-      <div className="bg-primary text-primary-foreground flex size-12 items-center justify-center rounded-xl">
-        <MessageSquareText className="size-6" aria-hidden="true" />
-      </div>
+      <BrandLogo className="size-20 rounded-3xl" />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">
-          Welcome to {APP_NAME}
+          How can I help you today?
         </h1>
         <p className="text-muted-foreground mt-1">
           Start a new conversation, or try one of these prompts:

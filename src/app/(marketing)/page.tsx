@@ -1,21 +1,12 @@
-import { Cta } from "@/components/landing/cta";
-import { Features } from "@/components/landing/features";
-import { Hero } from "@/components/landing/hero";
-import { SiteFooter } from "@/components/landing/site-footer";
-import { SiteHeader } from "@/components/landing/site-header";
-import { Tech } from "@/components/landing/tech";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function LandingPage() {
-  return (
-    <div className="flex min-h-screen flex-col">
-      <SiteHeader />
-      <main className="flex-1">
-        <Hero />
-        <Tech />
-        <Features />
-        <Cta />
-      </main>
-      <SiteFooter />
-    </div>
-  );
+/**
+ * Opening the site drops you straight into chat, like ChatGPT:
+ * signed-in users get their workspace, visitors get the guest trial.
+ * The marketing landing page remains available at /home.
+ */
+export default async function RootPage() {
+  const { userId } = await auth();
+  redirect(userId ? "/chat" : "/try");
 }
