@@ -5,17 +5,23 @@ import { toast } from "sonner";
 
 import { ChatComposer } from "@/components/chat/chat-composer";
 import { ChatMessage } from "@/components/chat/chat-message";
+import { ModelChangeDivider } from "@/components/chat/model-change-divider";
 import { useConversations } from "@/components/chat/conversations-provider";
 import { PENDING_PROMPT_STORAGE_KEY } from "@/components/chat/empty-chat";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
 import { useSelectedModel } from "@/hooks/use-selected-model";
+import { getChatModel } from "@/lib/models";
 import { generateLocalTitle } from "@/lib/validation";
-import type {
-  AttachmentMeta,
-  ChatMessage as ChatMessageType,
-  ChatStreamEvent,
-  UsageInfo,
+import {
+  isModelChangeMarker,
+  type AttachmentMeta,
+  type ChatMessage as ChatMessageType,
+  type ChatStreamEvent,
+  type ModelChangeMarker,
+  type UsageInfo,
 } from "@/types/chat";
+
+type TimelineItem = ChatMessageType | ModelChangeMarker;
 import type { ConversationRow } from "@/types/database";
 
 const DEFAULT_TITLE = "New Conversation";
@@ -30,7 +36,7 @@ export function ChatPanel({
   initialUsage: UsageInfo;
 }) {
   const { conversations, applyLocalUpdate } = useConversations();
-  const [messages, setMessages] = useState<ChatMessageType[]>(initialMessages);
+  const [messages, setMessages] = useState<TimelineItem[]>(initialMessages);
   const [streamingText, setStreamingText] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [usage, setUsage] = useState(initialUsage);
@@ -50,6 +56,24 @@ export function ChatPanel({
     return "";
   });
   const abortRef = useRef<AbortController | null>(null);
+
+  // Switching models mid-conversation drops an in-thread notice so it's
+  // clear which model answers next.
+  const handleModelChange = (id: string) => {
+    if (id === model) return;
+    setModel(id);
+    const info = getChatModel(id);
+    if (info && messages.some((item) => !isModelChangeMarker(item))) {
+      setMessages((previous) => [
+        ...previous,
+        {
+          kind: "model-change",
+          id: `model-${Date.now()}`,
+          modelLabel: info.label,
+        },
+      ]);
+    }
+  };
 
   const { containerRef, handleScroll } = useChatScroll(
     `${messages.length}:${streamingText?.length ?? 0}`,
@@ -251,9 +275,13 @@ export function ChatPanel({
               Send your first message to start the conversation.
             </p>
           )}
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))}
+          {messages.map((item) =>
+            isModelChangeMarker(item) ? (
+              <ModelChangeDivider key={item.id} modelLabel={item.modelLabel} />
+            ) : (
+              <ChatMessage key={item.id} message={item} />
+            ),
+          )}
           {streamingText !== null && (
             <ChatMessage
               isStreaming
@@ -278,7 +306,7 @@ export function ChatPanel({
         onSend={send}
         onStop={stop}
         model={model}
-        onModelChange={setModel}
+        onModelChange={handleModelChange}
         initialText={initialPrompt}
       />
     </div>

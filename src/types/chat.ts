@@ -37,3 +37,17 @@ export type GuestChatMessage = {
   content: string;
   status: "completed" | "error";
 };
+
+/**
+ * An in-thread marker shown when the user switches models mid-conversation.
+ * Lives only in client state — never sent to the AI or persisted.
+ */
+export type ModelChangeMarker = {
+  kind: "model-change";
+  id: string;
+  modelLabel: string;
+};
+
+export function isModelChangeMarker(item: object): item is ModelChangeMarker {
+  return "kind" in item && item.kind === "model-change";
+}

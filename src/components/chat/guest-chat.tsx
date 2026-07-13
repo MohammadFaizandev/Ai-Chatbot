@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { ChatMessage } from "@/components/chat/chat-message";
+import { ModelChangeDivider } from "@/components/chat/model-change-divider";
 import { ModelPicker } from "@/components/chat/model-picker";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -21,11 +22,16 @@ import { useChatScroll } from "@/hooks/use-chat-scroll";
 import { useSelectedModel } from "@/hooks/use-selected-model";
 import { APP_NAME } from "@/lib/brand";
 import { CLIENT_MAX_MESSAGE_LENGTH } from "@/lib/client-config";
-import type {
-  ChatMessage as ChatMessageType,
-  GuestChatMessage,
-  GuestChatStreamEvent,
+import { getChatModel } from "@/lib/models";
+import {
+  isModelChangeMarker,
+  type ChatMessage as ChatMessageType,
+  type GuestChatMessage,
+  type GuestChatStreamEvent,
+  type ModelChangeMarker,
 } from "@/types/chat";
+
+type GuestTimelineItem = GuestChatMessage | ModelChangeMarker;
 
 const STORAGE_KEY = "guest-chat-transcript";
 const MAX_TEXTAREA_HEIGHT_PX = 200;
@@ -54,7 +60,7 @@ export function GuestChat({
   limit: number;
   signedInLimit: number;
 }) {
-  const [messages, setMessages] = useState<GuestChatMessage[]>([]);
+  const [messages, setMessages] = useState<GuestTimelineItem[]>([]);
   const [streamingText, setStreamingText] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [remaining, setRemaining] = useState(initialRemaining);
@@ -75,7 +81,7 @@ export function GuestChat({
       const stored = sessionStorage.getItem(STORAGE_KEY);
       if (stored) {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time restore of persisted state after mount
-        setMessages(JSON.parse(stored) as GuestChatMessage[]);
+        setMessages(JSON.parse(stored) as GuestTimelineItem[]);
       }
     } catch {
       // Unavailable or corrupt storage — start empty.
@@ -129,6 +135,9 @@ export function GuestChat({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: transcript
+            .filter(
+              (item): item is GuestChatMessage => !isModelChangeMarker(item),
+            )
             .slice(-MAX_SENT_MESSAGES)
             .map(({ role, content }) => ({ role, content })),
           model,
@@ -236,6 +245,23 @@ export function GuestChat({
     void send();
   };
 
+  // Note the model switch in-thread so it's clear which model answers next.
+  const handleModelChange = (id: string) => {
+    if (id === model) return;
+    setModel(id);
+    const info = getChatModel(id);
+    if (info && messages.some((item) => !isModelChangeMarker(item))) {
+      setMessages((previous) => [
+        ...previous,
+        {
+          kind: "model-change",
+          id: `model-${Date.now()}`,
+          modelLabel: info.label,
+        },
+      ]);
+    }
+  };
+
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -283,9 +309,13 @@ export function GuestChat({
               </p>
             </div>
           )}
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={toChatMessage(message)} />
-          ))}
+          {messages.map((item) =>
+            isModelChangeMarker(item) ? (
+              <ModelChangeDivider key={item.id} modelLabel={item.modelLabel} />
+            ) : (
+              <ChatMessage key={item.id} message={toChatMessage(item)} />
+            ),
+          )}
           {streamingText !== null && (
             <ChatMessage
               isStreaming
@@ -363,7 +393,7 @@ export function GuestChat({
         <div className="mx-auto mt-1 flex w-full max-w-3xl items-center justify-between gap-2 px-1">
           <ModelPicker
             value={model}
-            onChange={setModel}
+            onChange={handleModelChange}
             disabled={isGenerating}
           />
           <p className="text-muted-foreground text-xs" aria-live="polite">
