@@ -1,5 +1,19 @@
 # Pulse AI — AI SaaS Chat Application
 
+![Next.js 16](https://img.shields.io/badge/Next.js%2016-000000?logo=nextdotjs&logoColor=white)
+![React 19](https://img.shields.io/badge/React%2019-087EA4?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS v4](https://img.shields.io/badge/Tailwind%20CSS%20v4-06B6D4?logo=tailwindcss&logoColor=white)
+![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-111111?logo=shadcnui&logoColor=white)
+![Clerk](https://img.shields.io/badge/Clerk-6C47FF?logo=clerk&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL%20%2B%20RLS-4169E1?logo=postgresql&logoColor=white)
+![OpenAI SDK](https://img.shields.io/badge/OpenAI%20SDK-412991?logo=openai&logoColor=white)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-777777?logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-3E67B1?logo=zod&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)
+
 A secure, production-ready AI chat application. Authenticated users hold streamed AI conversations with saved history, image analysis, rich Markdown answers, and a daily usage limit — built on a modern, free-tier-friendly stack.
 
 > Rename the product in one file: `src/lib/brand.ts`.
